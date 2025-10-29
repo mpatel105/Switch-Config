@@ -62,6 +62,10 @@
       ios_command:
         commands:
           - write memory
+
+#    - name: Wait 10 seconds before reload
+#  pause:
+#    seconds: 10
         
     - name: Prompt for reload confirmation
       pause:
