@@ -10,6 +10,7 @@
     tftp_server: 10.0.0.82
     image_filename: c3560cx-universalk9-mz.152-7.E12.bin
     destination_path: flash:{{ image_filename }}
+    expected_md5: "39e232a6309e460f4d9eba9ca090031c"  # Replace with actual MD5
 
   tasks:
 
@@ -36,9 +37,21 @@
           - dir flash:
       register: flash_contents
 
-    - name: Show flash contents
-      debug:
-        var: flash_contents.stdout_lines
+    - name: Confirm image is present
+      fail:
+        msg: "Image not found in flash after copy."
+      when: image_filename not in flash_contents.stdout[0]
+
+    - name: Verify MD5 checksum of copied image
+      ios_command:
+        commands:
+          - verify /md5 {{ destination_path }}
+      register: md5_result
+
+    - name: Check MD5 hash matches expected
+      fail:
+        msg: "MD5 checksum mismatch! Expected {{ expected_md5 }}, got {{ md5_result.stdout[0].split()[-1] }}"
+      when: md5_result.stdout[0].split()[-1] != expected_md5
 
     - name: Set boot variable to new image
       ios_config:
@@ -49,3 +62,16 @@
       ios_command:
         commands:
           - write memory
+        
+    - name: Prompt for reload confirmation
+      pause:
+        prompt: "Image copied and verified. Press Enter to reload the switch or Ctrl+C to cancel."
+
+    - name: Reload the switch
+      ios_command:
+        commands:
+          - reload
+      vars:
+        ansible_command_timeout: 60
+
+
