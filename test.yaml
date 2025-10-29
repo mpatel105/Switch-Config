@@ -1,0 +1,10 @@
+---
+- name: Test SSH connection to Cisco switch
+  hosts: cisco_switch
+  gather_facts: no
+  connection: network_cli
+  tasks:
+    - name: Run show version
+      ios_command:
+        commands:
+          - show version
