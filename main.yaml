@@ -1,0 +1,51 @@
+---
+- name: Copy Cisco IOS image from TFTP to 3560-CX
+  hosts: cisco_switch
+  gather_facts: no
+  connection: network_cli
+  collections:
+    - cisco.ios
+
+  vars:
+    tftp_server: 10.0.0.82
+    image_filename: c3560cx-universalk9-mz.152-7.E12.bin
+    destination_path: flash:{{ image_filename }}
+
+  tasks:
+
+    - name: Verify TFTP server reachability
+      ios_command:
+        commands:
+          - ping {{ tftp_server }}
+      register: ping_result
+
+    - name: Show ping result
+      debug:
+        var: ping_result.stdout_lines
+
+    - name: Copy image from TFTP to flash
+      ios_command:
+        commands:
+          - copy tftp://{{ tftp_server }}/{{ image_filename }} {{ destination_path }}
+      vars:
+        ansible_command_timeout: 300
+
+    - name: Verify image copied
+      ios_command:
+        commands:
+          - dir flash:
+      register: flash_contents
+
+    - name: Show flash contents
+      debug:
+        var: flash_contents.stdout_lines
+
+    - name: Set boot variable to new image
+      ios_config:
+        lines:
+          - boot system switch all {{ destination_path }}
+
+    - name: Save configuration
+      ios_command:
+        commands:
+          - write memory
