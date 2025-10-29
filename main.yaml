@@ -9,6 +9,7 @@
   vars:
     tftp_server: 10.0.0.82
     image_filename: c3560cx-universalk9-mz.152-7.E12.bin
+    tftp_path: "tftp://{{ tftp_server//private/tftpboot/ }}/{{ image_filename }}"
     destination_path: flash:{{ image_filename }}
     expected_md5: "39e232a6309e460f4d9eba9ca090031c"  # Replace with actual MD5
 
