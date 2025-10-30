@@ -4,7 +4,7 @@
   gather_facts: no
   connection: network_cli
   tasks:
-    - name: Run show version
-      ios_command:
-        commands:
-          - show version
+    - name: Verify image copied
+      cli_command:
+        command: "dir flash:"
+      register: flash_contents

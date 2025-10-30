@@ -26,17 +26,19 @@
       debug:
         var: ping_result.stdout_lines
 
-    - name: Copy image from TFTP to flash
-      ios_command:
-        commands:
-          - copy tftp://{{ tftp_server }}/{{ image_filename }} {{ destination_path }}
-      vars:
-        ansible_command_timeout: 600  # Increaseed to 10 min
+#    - name: Copy image from TFTP to flash
+#      cli_command:
+#        command: copy tftp://{{ tftp_server }}/{{ image_filename }} {{ destination_path }}
+#        prompt:
+#          - 'Destination filename'
+#        answer:
+#          - '{{ image_filename }}'
+#      vars:
+#        ansible_command_timeout: 600  # Increaseed to 10
 
     - name: Verify image copied
-      ios_command:
-        commands:
-          - dir flash:
+      cli_command:
+        command: "dir flash:"
       register: flash_contents
 
     - name: Confirm image is present
