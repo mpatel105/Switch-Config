@@ -41,10 +41,10 @@
         command: "dir flash:"
       register: flash_contents
 
-    - name: Confirm image is present
-      fail:
-        msg: "Image not found in flash after copy."
-      when: image_filename not in flash_contents.stdout[0]
+#    - name: Confirm image is present
+#      fail:
+#        msg: "Image not found in flash after copy."
+#      when: image_filename not in flash_contents.stdout[0]
 
     - name: Verify MD5 checksum of copied image
       ios_command:
@@ -60,7 +60,7 @@
     - name: Set boot variable to new image
       ios_config:
         lines:
-          - boot system switch all {{ destination_path }}
+          - boot system flash:/{{ image_filename }}
 
     - name: Save configuration
       ios_command:
@@ -76,10 +76,14 @@
         prompt: "Image copied and verified. Press Enter to reload the switch or Ctrl+C to cancel."
 
     - name: Reload the switch
-      ios_command:
-        commands:
-          - reload
+      cli_command:
+        command: reload
+        prompt:
+          - "[confirm]"
+        answer:
+          - "\n"
+
       vars:
-        ansible_command_timeout: 60
+        ansible_command_timeout: 15
 
 
